@@ -47,13 +47,13 @@ DpmDeviceData Psu::read() {
   }
 
   res.max_current = _client->read('l');
-  if (res.max_current == -14) {
+  if (res.max_current == -15) {
     res.max_current = 0;
     isConnected = false;
   }
 
   res.temperature = _client->read('t');
-  if (res.temperature == -15) {
+  if (res.temperature == -16) {
     res.temperature = 0;
     isConnected = false;
   }
