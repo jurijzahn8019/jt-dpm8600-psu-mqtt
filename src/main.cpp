@@ -158,5 +158,10 @@ void loop() {
     DpmDeviceData dpmData = dpm->read();
     webApi.dash(dpmData);
     mqtt.publish(dpmData);
+    Serial.println(
+        "Is connected: " + String(dpmData.connected) + ", Power: " + String(dpmData.power) +
+        ", V: " + dpmData.voltage + " (" + dpmData.max_voltage +
+        "), A: " + dpmData.current + " (" + dpmData.max_current +
+        "), CC/CV: " + dpmData.cccv_status + ", Temp: " + dpmData.temperature);
   }
 }
