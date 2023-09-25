@@ -17,8 +17,12 @@ void WebApi::begin() {
   _server->on("/api/config", HTTP_GET, [config](AsyncWebServerRequest* request) {
     AsyncResponseStream* response = request->beginResponseStream("application/json");
 
-    serializeJson(config->getJson(), Serial);
-    serializeJson(config->getJson(), *response);
+    JsonObject res = config->getJson().as<JsonObject>();
+    res["IP"] = WiFi.localIP();
+    res["MAC"] = WiFi.macAddress();
+
+    serializeJson(res, Serial);
+    serializeJson(res, *response);
     request->send(response);
   });
 
@@ -59,16 +63,23 @@ void WebApi::begin() {
       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
     }
 
-    // send event with message "hello!", id current millis
-    // and set reconnect delay to 1 second
+    DpmDeviceData data;
     StaticJsonDocument<1024> doc;
-    doc["Name"] = config->data.deviceName;
     doc["RSSI"] = WiFi.RSSI();
-    doc["IP"] = WiFi.localIP();
-    doc["MAC"] = WiFi.macAddress();
+    doc["power"] = data.power;
+    doc["voltage"] = data.voltage;
+    doc["current"] = data.current;
+    doc["max_current"] = data.max_current;
+    doc["max_voltage"] = data.max_voltage;
+    doc["cccv_status"] = data.cccv_status;
+    doc["temperature"] = data.temperature;
+    doc["timestamp"] = data.timestamp;
+    doc["connected"] = data.connected;
     String payload;
     serializeJson(doc, payload);
 
+    // send event with name: "message" ,id current millis
+    // and set reconnect delay to 1 second
     client->send(payload.c_str(), NULL, millis(), 1000);
   });
   _server->addHandler(&_events);
@@ -86,10 +97,7 @@ void WebApi::dash(DpmDeviceData data) {
   this->loop();
 
   StaticJsonDocument<1024> doc;
-  doc["Name"] = _config->data.deviceName;
   doc["RSSI"] = WiFi.RSSI();
-  doc["IP"] = WiFi.localIP();
-  doc["MAC"] = WiFi.macAddress();
   doc["power"] = data.power;
   doc["voltage"] = data.voltage;
   doc["current"] = data.current;
@@ -98,6 +106,7 @@ void WebApi::dash(DpmDeviceData data) {
   doc["cccv_status"] = data.cccv_status;
   doc["temperature"] = data.temperature;
   doc["timestamp"] = data.timestamp;
+  doc["connected"] = data.connected;
   String payload;
   serializeJson(doc, payload);
 

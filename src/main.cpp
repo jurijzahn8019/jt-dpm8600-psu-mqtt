@@ -52,6 +52,11 @@ SoftwareSerial uart(D2, D1);
 #include "mqtt.h"
 MqttClient mqtt(&config);
 
+#include "favicon_png.h"
+#include "index_css.h"
+#include "index_html.h"
+#include "index_js.h"
+
 // callback notifying us of the need to save config
 void saveConfigCallback() {
   Serial.println("Should save config");
@@ -66,7 +71,9 @@ void onRequest(AsyncWebServerRequest* request) {
 
   // Handle Unknown Request
   Serial.println("Not Found Serve Index page");
-  request->send(SPIFFS, "/index.html");
+  AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html);
+  response->addHeader("Content-Type", "text/html");
+  request->send(response);
 }
 
 void onBody(AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total) {
@@ -129,7 +136,24 @@ void setup() {
   Serial.println("Start Web Server");
 
   webApi.begin();
-  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+
+  // Setup Webapp Routes
+  server.on("/", [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html);
+    request->send(response);
+  });
+  server.on("/index.js", [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "application/javascript", index_js);
+    request->send(response);
+  });
+  server.on("/index.css", [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", index_css);
+    request->send(response);
+  });
+  server.on("/favicon.png", [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "image/png", favicon_png);
+    request->send(response);
+  });
 
   // Catch All
   server.onNotFound(onRequest);

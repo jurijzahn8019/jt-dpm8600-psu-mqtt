@@ -33,6 +33,7 @@
 		"vitest": "^0.34.0"
 	},
 	"dependencies": {
+		"globby": "^13.2.2",
 		"picnic": "^7.1.0"
 	}
 }

@@ -92,7 +92,9 @@ bool MqttClient::discoPublishNumber(String name, String node, String icon, int32
   disco["ent_cat"] = "config";
   disco["min"] = min;
   disco["max"] = max;
+  disco["step"] = 0.01;
   disco["cmd_t"] = commandTopic;
+
   _client.subscribe(commandTopic.c_str());
 
   return sendDiscoMessage(disco.as<JsonObject>(), "number", node);

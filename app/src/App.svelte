@@ -5,6 +5,7 @@
 	import Restart from './routes/Restart.svelte';
 	import { globalHistory } from 'svelte-routing/src/history';
 	import { writable } from 'svelte/store';
+	import { useConfig } from './lib/config';
 
 	export let url = '';
 	let menu: HTMLInputElement;
@@ -31,11 +32,17 @@
 	let activeRoute = routes[0];
 	$: activeRoute =
 		[...routes].reverse().find((r) => $route.pathname.startsWith(r.href)) ?? routes[0];
+
+	const [config] = useConfig();
 </script>
+
+<svelte:head>
+	<title>{$config.device_name}</title>
+</svelte:head>
 
 <Router {url}>
 	<nav>
-		<Link class="brand" to="/">DPM Controller</Link>
+		<Link class="brand" to="/">{$config.device_name}</Link>
 		<span class="brand" style="font-weight: 100;">{activeRoute.title}</span>
 
 		<input id="bmenub" type="checkbox" class="show" bind:this={menu} />
