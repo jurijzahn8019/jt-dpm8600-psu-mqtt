@@ -52,6 +52,8 @@
 			{#each routes.slice(1) as route}
 				<Link class="button" to={route.href}>{route.title}</Link>
 			{/each}
+
+			<a class="button" href="/update">Update</a>
 		</div>
 	</nav>
 	<div class="main">

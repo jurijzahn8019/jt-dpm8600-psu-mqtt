@@ -25,7 +25,8 @@ async function save(value: Config): Promise<Config> {
   ).json();
 }
 
-const config = writable<Config>(await load());
+const config = writable<Config>({} as never);
+load().then(d => config.set(d));
 
 setInterval(async () => {
   config.set(await load());

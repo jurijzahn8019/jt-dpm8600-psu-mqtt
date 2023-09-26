@@ -154,6 +154,10 @@ bool MqttClient::processCommand(char *_topic, byte *payload, unsigned int length
 bool MqttClient::loop() {
   Configuration::Data conf = _config->data;
 
+  if (conf.mqttServer == "") {
+    return true;
+  }
+
   int16_t connCount = 0;
   while (connCount < 3 && !_client.connected()) {
     Serial.println("connect to MQTT Broker as: " + _clientId + ", User: " + conf.mqttUser + ":" + conf.mqttPass);

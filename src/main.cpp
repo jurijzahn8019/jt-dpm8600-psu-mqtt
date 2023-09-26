@@ -35,10 +35,8 @@ AsyncWebServer server(80);
 AsyncWiFiManager wifiManager(&server, &dns);
 
 long last_execution = 0;
-
 // flag for saving data
 bool shouldSaveConfig = false;
-bool shouldResetDevice = false;
 
 Configuration config("DPM8600-" + String(ESP.getChipId()));
 
@@ -51,6 +49,32 @@ SoftwareSerial uart(D2, D1);
 
 #include "mqtt.h"
 MqttClient mqtt(&config);
+
+#include <ElegantOTA.h>
+unsigned long ota_progress_millis = 0;
+void onOTAStart() {
+  // Log when OTA has started
+  Serial.println("OTA update started!");
+  // <Add your own code here>
+}
+
+void onOTAProgress(size_t current, size_t final) {
+  // Log every 1 second
+  if (millis() - ota_progress_millis > 1000) {
+    ota_progress_millis = millis();
+    Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
+  }
+}
+
+void onOTAEnd(bool success) {
+  // Log when OTA has finished
+  if (success) {
+    Serial.println("OTA update finished successfully!");
+  } else {
+    Serial.println("There was an error during OTA update!");
+  }
+  // <Add your own code here>
+}
 
 #include "favicon_png.h"
 #include "index_css.h"
@@ -133,25 +157,38 @@ void setup() {
   Serial.println("Device Name: " + config.data.deviceName);
   Serial.println("IP Address: " + String(WiFi.localIP().toString()));
   Serial.println("MAC Address: " + String(WiFi.macAddress()));
-  Serial.println("Start Web Server");
 
+  Serial.println("Setup Webserver");
+
+  // OTA Service
+  ElegantOTA.begin(&server);  // Start ElegantOTA
+  // ElegantOTA callbacks
+  ElegantOTA.onStart(onOTAStart);
+  ElegantOTA.onProgress(onOTAProgress);
+  ElegantOTA.onEnd(onOTAEnd);
+
+  // Webapi
   webApi.begin();
 
-  // Setup Webapp Routes
+  // Webapp
   server.on("/", [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html);
+    // response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
   server.on("/index.js", [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse* response = request->beginResponse_P(200, "application/javascript", index_js);
+    // response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
   server.on("/index.css", [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", index_css);
+    // response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
   server.on("/favicon.png", [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse* response = request->beginResponse_P(200, "image/png", favicon_png);
+    // response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
 
@@ -163,6 +200,8 @@ void setup() {
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "content-type");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+
+  Serial.println("Start Web Server");
   server.begin();
 
   dpm = new Psu(&config);
@@ -175,6 +214,7 @@ void loop() {
   mrd->loop();
   webApi.loop();
   mqtt.loop();
+  ElegantOTA.loop();
 
   if ((millis() - last_execution) >= SYSTEM_STAT_INTERVAL) {
     // Serial.println("Executing Stuff: " + String(last_execution));

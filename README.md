@@ -14,15 +14,15 @@ This variant provides:
 
 - Captive portal, for WiFi configuration.
 - Web interface for configuring mqtt connection, device name etc.
-- Simple Web api (used by web interface)
+- OTA Update (Thanks to: <https://github.com/ayushsharma82/ElegantOTA>)
+- Simple Web api (used by web interface) (Thakns to: <https://github.com/me-no-dev/ESPAsyncWebServer>)
 - Home Assistant discovery
 
 ## Missing Features
 
 - More targeted devices
-- OTA Update
 - Control Device via Web interface
-- Config option to use or not use mqtt
+- Config option to use or not use mqtt (currently leave server empty to disable)
 - Config option to use or not use home assistant discovery
 - ...many, many more
 

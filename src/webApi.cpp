@@ -21,7 +21,7 @@ void WebApi::begin() {
     res["IP"] = WiFi.localIP();
     res["MAC"] = WiFi.macAddress();
 
-    serializeJson(res, Serial);
+    // serializeJson(res, Serial);
     serializeJson(res, *response);
     request->send(response);
   });
@@ -30,8 +30,8 @@ void WebApi::begin() {
     Serial.println("Update Config");
     JsonObject jsonObj = json.as<JsonObject>();
 
-    Serial.println("Set config from JSON");
-    serializeJson(jsonObj, Serial);
+    // Serial.println("Set config from JSON");
+    // serializeJson(jsonObj, Serial);
     config->fromJson(jsonObj);
     config->save();
 
@@ -94,8 +94,6 @@ void WebApi::loop() {
 }
 
 void WebApi::dash(DpmDeviceData data) {
-  this->loop();
-
   StaticJsonDocument<1024> doc;
   doc["RSSI"] = WiFi.RSSI();
   doc["power"] = data.power;
