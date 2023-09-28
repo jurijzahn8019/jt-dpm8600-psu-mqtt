@@ -123,7 +123,7 @@ void MqttClient::publishDiscovery() {
   discoPublishSwitch("Power", "power", "power");
   discoPublishSensor("Voltage", "voltage", "sine-wave", "voltage", true, "V");
   discoPublishSensor("Curent", "current", "current-dc", "current", true, "A");
-  discoPublishSensor("Temperature", "temp", "thermometer-lines", "temperature", true, "°C");
+  discoPublishSensor("Temperature", "temperature", "thermometer-lines", "temperature", true, "°C");
 
   discoPublishNumber("Max Voltage", "max_voltage", "sine-wave", "V", 0, 60);
   discoPublishNumber("Max Curent", "max_current", "current-dc", "A", 0, 24);
