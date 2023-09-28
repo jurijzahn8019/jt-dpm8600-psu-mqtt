@@ -33,7 +33,7 @@ class MqttClient {
   StaticJsonDocument<1024> buildDicoMessage(String name, String node, String icon);
   bool discoPublishSwitch(String name, String node, String icon);
   bool discoPublishSensor(String name, String node, String icon, String deviceClass, boolean enabledDefault, String unit);
-  bool discoPublishNumber(String name, String node, String icon, int32_t min, int32_t max);
+  bool discoPublishNumber(String name, String node, String icon, String unit, int32_t min, int32_t max);
   bool sendDiscoMessage(JsonObject disco, String type, String node);
   void publishDiscovery();
 

@@ -85,7 +85,7 @@ bool MqttClient::discoPublishSensor(String name, String node, String icon, Strin
   return sendDiscoMessage(disco.as<JsonObject>(), "sensor", node);
 }
 
-bool MqttClient::discoPublishNumber(String name, String node, String icon, int32_t min, int32_t max) {
+bool MqttClient::discoPublishNumber(String name, String node, String icon, String unit, int32_t min, int32_t max) {
   StaticJsonDocument<1024> disco = buildDicoMessage(name, node, icon);
   String commandTopic = (_stateTopic + "/set/" + node);
 
@@ -94,6 +94,7 @@ bool MqttClient::discoPublishNumber(String name, String node, String icon, int32
   disco["max"] = max;
   disco["step"] = 0.01;
   disco["cmd_t"] = commandTopic;
+  disco["unit_of_meas"] = unit;
 
   _client.subscribe(commandTopic.c_str());
 
@@ -122,11 +123,10 @@ void MqttClient::publishDiscovery() {
   discoPublishSwitch("Power", "power", "power");
   discoPublishSensor("Voltage", "voltage", "sine-wave", "voltage", true, "V");
   discoPublishSensor("Curent", "current", "current-dc", "current", true, "A");
-  discoPublishSensor("Temperature", "temp", "thermometer-lines", "temp", true, "°C");
-  discoPublishSensor("", "temp", "thermometer-lines", "temp", true, "°C");
+  discoPublishSensor("Temperature", "temp", "thermometer-lines", "temperature", true, "°C");
 
-  discoPublishNumber("Max Voltage", "max_voltage", "sine-wave", 0, 60);
-  discoPublishNumber("Max Curent", "max_current", "current-dc", 0, 24);
+  discoPublishNumber("Max Voltage", "max_voltage", "sine-wave", "V", 0, 60);
+  discoPublishNumber("Max Curent", "max_current", "current-dc", "A", 0, 24);
 }
 
 bool MqttClient::processCommand(char *_topic, byte *payload, unsigned int length) {
