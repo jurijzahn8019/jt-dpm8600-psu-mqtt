@@ -16,7 +16,8 @@ export default defineConfig({
 				chunkFileNames: "[name].js",
 				assetFileNames: "[name].[ext]",
 			}
-		}
+		},
+		assetsInlineLimit: 9186
 	},
 	plugins: [svelte(), {
 		name: "vite:save-as-progmem",

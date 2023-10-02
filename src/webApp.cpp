@@ -37,11 +37,6 @@ void webAppBegin(AsyncWebServer* server) {
     // response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
-  server->on("/favicon.png", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "image/png", favicon_png);
-    // response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
 
   server->onNotFound(onRequest);
   server->onFileUpload(onUpload);
