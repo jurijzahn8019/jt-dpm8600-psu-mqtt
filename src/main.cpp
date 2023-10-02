@@ -51,6 +51,25 @@ SoftwareSerial uart(D2, D1);
 #include "mqtt.h"
 MqttClient mqtt(&config);
 
+#include <Ticker.h>
+Ticker ticker;
+
+bool isConnected = false;
+bool isReading = false;
+
+void tick() {
+  int state = digitalRead(LED_BUILTIN);
+
+  if (isReading && state != LOW) {
+    digitalWrite(LED_BUILTIN, LOW);
+    return;
+  }
+
+  if (!isConnected) {
+    digitalWrite(LED_BUILTIN, !state);
+  }
+};
+
 #include <ElegantOTA.h>
 unsigned long ota_progress_millis = 0;
 void onOTAStart() {
@@ -152,6 +171,10 @@ void setup() {
   dpm = new Psu(&config);
   Serial.println("Connected to DCDC: " + String(dpm->begin(&uart)));
   Serial.println("configure Mqtt: " + String(mqtt.begin(dpm)));
+
+  Serial.println("instantiate led controller");
+  pinMode(LED_BUILTIN, OUTPUT);
+  ticker.attach(0.5, tick);
 }
 
 void loop() {
@@ -164,7 +187,10 @@ void loop() {
   if ((millis() - last_execution) >= SYSTEM_STAT_INTERVAL) {
     // Serial.println("Executing Stuff: " + String(last_execution));
     last_execution = millis();
+    isReading = true;
     DpmDeviceData dpmData = dpm->read();
+    isConnected = dpmData.connected;
+    isReading = false;
 
     webApi.dash(dpmData);
     mqtt.publish(dpmData);
