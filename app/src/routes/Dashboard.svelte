@@ -6,10 +6,6 @@
 	let table = derived(data, (v) => Object.entries(v));
 
 	const events = new EventSource(new URL('events', apiEndpoint));
-	events.addEventListener('message', (e) => {
-		data.set(JSON.parse(e.data));
-	});
-
 	events.addEventListener(
 		'dashboard',
 		function (e) {
