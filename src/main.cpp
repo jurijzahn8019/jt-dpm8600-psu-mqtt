@@ -41,6 +41,7 @@ bool shouldSaveConfig = false;
 Configuration config("DPM8600-" + String(ESP.getChipId()));
 
 #include "webApi.h"
+#include "webApp.h"
 WebApi webApi(&server, &config);
 
 #include "psu.h"
@@ -76,36 +77,10 @@ void onOTAEnd(bool success) {
   // <Add your own code here>
 }
 
-#include "favicon_png.h"
-#include "index_css.h"
-#include "index_html.h"
-#include "index_js.h"
-
 // callback notifying us of the need to save config
 void saveConfigCallback() {
   Serial.println("Should save config");
   shouldSaveConfig = true;
-}
-
-void onRequest(AsyncWebServerRequest* request) {
-  if (request->method() == HTTP_OPTIONS) {
-    request->send(200);
-    return;
-  }
-
-  // Handle Unknown Request
-  Serial.println("Not Found Serve Index page");
-  AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html);
-  response->addHeader("Content-Type", "text/html");
-  request->send(response);
-}
-
-void onBody(AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total) {
-  // Handle body
-}
-
-void onUpload(AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
-  // Handle upload
 }
 
 void setup() {
@@ -158,48 +133,18 @@ void setup() {
   Serial.println("IP Address: " + String(WiFi.localIP().toString()));
   Serial.println("MAC Address: " + String(WiFi.macAddress()));
 
-  Serial.println("Setup Webserver");
-
-  // OTA Service
+  Serial.println("Setup Ota Module");
   ElegantOTA.begin(&server);  // Start ElegantOTA
   // ElegantOTA callbacks
   ElegantOTA.onStart(onOTAStart);
   ElegantOTA.onProgress(onOTAProgress);
   ElegantOTA.onEnd(onOTAEnd);
 
-  // Webapi
+  Serial.println("Setup WebApi");
   webApi.begin();
 
-  // Webapp
-  server.on("/", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html);
-    // response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-  server.on("/index.js", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "application/javascript", index_js);
-    // response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-  server.on("/index.css", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", index_css);
-    // response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-  server.on("/favicon.png", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "image/png", favicon_png);
-    // response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-
-  // Catch All
-  server.onNotFound(onRequest);
-  server.onFileUpload(onUpload);
-  server.onRequestBody(onBody);
-
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "content-type");
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  Serial.println("Setup WebApp");
+  webAppBegin(&server);
 
   Serial.println("Start Web Server");
   server.begin();
@@ -220,8 +165,10 @@ void loop() {
     // Serial.println("Executing Stuff: " + String(last_execution));
     last_execution = millis();
     DpmDeviceData dpmData = dpm->read();
+
     webApi.dash(dpmData);
     mqtt.publish(dpmData);
+
     Serial.println(
         "Is connected: " + String(dpmData.connected) + ", Power: " + String(dpmData.power) +
         ", V: " + dpmData.voltage + " (" + dpmData.max_voltage +

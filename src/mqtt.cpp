@@ -197,7 +197,6 @@ bool MqttClient::publish(DpmDeviceData data) {
   StaticJsonDocument<1024> doc;
   doc["rssi"] = WiFi.RSSI();
   doc["ip"] = WiFi.localIP();
-  doc["timestamp"] = data.timestamp;
   doc["power"] = data.power;
   doc["voltage"] = data.voltage;
   doc["current"] = data.current;

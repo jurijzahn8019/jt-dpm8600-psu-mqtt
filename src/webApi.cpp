@@ -58,29 +58,16 @@ void WebApi::begin() {
     _state->shouldReset = true;
   });
 
-  _events.onConnect([config](AsyncEventSourceClient* client) {
+  _events.onConnect([this](AsyncEventSourceClient* client) {
     if (client->lastId()) {
       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
     }
 
-    DpmDeviceData data;
-    StaticJsonDocument<1024> doc;
-    doc["RSSI"] = WiFi.RSSI();
-    doc["power"] = data.power;
-    doc["voltage"] = data.voltage;
-    doc["current"] = data.current;
-    doc["max_current"] = data.max_current;
-    doc["max_voltage"] = data.max_voltage;
-    doc["cccv_status"] = data.cccv_status;
-    doc["temperature"] = data.temperature;
-    doc["timestamp"] = data.timestamp;
-    doc["connected"] = data.connected;
-    String payload;
-    serializeJson(doc, payload);
-
     // send event with name: "message" ,id current millis
     // and set reconnect delay to 1 second
-    client->send(payload.c_str(), NULL, millis(), 1000);
+    client->send("connected", NULL, millis(), 1000);
+
+    publishDashboard();
   });
   _server->addHandler(&_events);
 }
@@ -95,18 +82,21 @@ void WebApi::loop() {
 
 void WebApi::dash(DpmDeviceData data) {
   StaticJsonDocument<1024> doc;
-  doc["RSSI"] = WiFi.RSSI();
-  doc["power"] = data.power;
-  doc["voltage"] = data.voltage;
-  doc["current"] = data.current;
-  doc["max_current"] = data.max_current;
-  doc["max_voltage"] = data.max_voltage;
-  doc["cccv_status"] = data.cccv_status;
-  doc["temperature"] = data.temperature;
-  doc["timestamp"] = data.timestamp;
-  doc["connected"] = data.connected;
-  String payload;
-  serializeJson(doc, payload);
+  _dashboard["RSSI"] = WiFi.RSSI();
+  _dashboard["power"] = data.power;
+  _dashboard["voltage"] = data.voltage;
+  _dashboard["current"] = data.current;
+  _dashboard["max_current"] = data.max_current;
+  _dashboard["max_voltage"] = data.max_voltage;
+  _dashboard["cccv_status"] = data.cccv_status;
+  _dashboard["temperature"] = data.temperature;
+  _dashboard["connected"] = data.connected;
 
+  publishDashboard();
+}
+
+void WebApi::publishDashboard() {
+  String payload;
+  serializeJson(_dashboard, payload);
   _events.send(payload.c_str(), "dashboard", millis());
 }

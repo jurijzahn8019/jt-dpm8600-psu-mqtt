@@ -5,7 +5,6 @@
 extern const unsigned long SYSTEM_STAT_INTERVAL;
 
 struct DpmDeviceData {
-  long timestamp = 0;
   char power[10];
   float voltage = 0;
   float current = 0;

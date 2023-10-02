@@ -12,12 +12,12 @@ bool Psu::begin(SoftwareSerial* serial) {
 
 DpmDeviceData Psu::read() {
   DpmDeviceData res;
-  isConnected = true;
+  res.connected = true;
 
   float power = _client->read('p');
   if (power == -12) {
     strcpy(res.power, "OFF");
-    isConnected = false;
+    res.connected = false;
   } else if (power == 1) {
     strcpy(res.power, "ON");
   } else {
@@ -27,19 +27,19 @@ DpmDeviceData Psu::read() {
   res.voltage = _client->read('v');
   if (res.voltage == -10) {
     res.voltage = 0;
-    isConnected = false;
+    res.connected = false;
   }
 
   res.current = _client->read('c');
   if (res.current == -11) {
     res.current = 0;
-    isConnected = false;
+    res.connected = false;
   }
 
   float cccv_status = _client->read('s');
   if (cccv_status == -13) {
     strcpy(res.cccv_status, "");
-    isConnected = false;
+    res.connected = false;
   } else if (cccv_status == 1) {
     strcpy(res.cccv_status, "CC");
   } else {
@@ -49,24 +49,24 @@ DpmDeviceData Psu::read() {
   res.max_current = _client->read('l');
   if (res.max_current == -15) {
     res.max_current = 0;
-    isConnected = false;
+    res.connected = false;
   }
 
   res.temperature = _client->read('t');
   if (res.temperature == -16) {
     res.temperature = 0;
-    isConnected = false;
+    res.connected = false;
   }
 
-  if (isConnected && _maxVoltage == 0) {
+  if (res.connected && _maxVoltage == 0) {
     _maxVoltage = res.voltage;
   }
 
-  if (isConnected && _maxCurrent == 0) {
+  if (res.connected && _maxCurrent == 0) {
     _maxCurrent = res.current;
   }
 
-  if (!isConnected) {
+  if (!res.connected) {
     res.max_voltage = 0;
   } else {
     res.max_voltage = _maxVoltage;

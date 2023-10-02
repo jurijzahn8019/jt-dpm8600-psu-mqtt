@@ -11,6 +11,7 @@ class WebApi {
   struct State {
     bool shouldReset;
   };
+
   WebApi(AsyncWebServer* server, Configuration* config);
   void begin();
   void loop();
@@ -21,6 +22,9 @@ class WebApi {
   AsyncWebServer* _server;
   Configuration* _config;
   AsyncEventSource _events;
+  StaticJsonDocument<1024> _dashboard;
+
+  void publishDashboard();
 };
 
 #endif

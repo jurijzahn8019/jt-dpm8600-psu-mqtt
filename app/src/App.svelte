@@ -53,7 +53,7 @@
 				<Link class="button" to={route.href}>{route.title}</Link>
 			{/each}
 
-			<a class="button" href="/update">Update</a>
+			<a class="button" href="/update" target="_blank">Update</a>
 		</div>
 	</nav>
 	<div class="main">
