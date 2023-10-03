@@ -57,26 +57,27 @@ Ticker ticker;
 bool isConnected = false;
 bool isReading = false;
 
-void tick() {
-  int state = digitalRead(LED_BUILTIN);
-  // Blinking
-  if (!isConnected) {
+long last_blink = 0;
+void led_reading() {
+  if (!isConnected && (millis() - last_blink) >= 500L) {
+    // Blinking
+    int state = digitalRead(LED_BUILTIN);
     digitalWrite(LED_BUILTIN, !state);
+    last_blink = millis();
     return;
   }
 
-  // Blinkig while reading
-  if (isReading && state != LOW) {
+  if (isReading && (millis() - last_blink) >= 500L) {
     digitalWrite(LED_BUILTIN, LOW);
     isReading = false;
+    last_blink = millis();
     return;
   }
 
-  if (!isReading && state != HIGH) {
+  if (!isReading) {
     digitalWrite(LED_BUILTIN, HIGH);
-    return;
   }
-};
+}
 
 #include <ElegantOTA.h>
 unsigned long ota_progress_millis = 0;
@@ -122,7 +123,7 @@ void setup() {
 
   Serial.println("instantiate led controller");
   pinMode(LED_BUILTIN, OUTPUT);
-  ticker.attach(0.5, tick);
+  ticker.attach(0.1, led_reading);
 
   Serial.println("Starting " + config.data.deviceName + ", HW ID: " + WiFi.macAddress());
   WiFi.hostname(config.data.deviceName.c_str());
