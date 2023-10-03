@@ -12,6 +12,7 @@
 //
 #include "configuration.h"
 #include "constants.h"
+#include "ota_update.h"
 
 // These definitions must be placed before #include <ESP_MultiResetDetector.h>
 // to be used Otherwise, default values (MRD_TIMES = 3, MRD_TIMEOUT = 10 seconds
@@ -79,32 +80,6 @@ void led_reading() {
   }
 }
 
-#include <ElegantOTA.h>
-unsigned long ota_progress_millis = 0;
-void onOTAStart() {
-  // Log when OTA has started
-  Serial.println("OTA update started!");
-  // <Add your own code here>
-}
-
-void onOTAProgress(size_t current, size_t final) {
-  // Log every 1 second
-  if (millis() - ota_progress_millis > 1000) {
-    ota_progress_millis = millis();
-    Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
-  }
-}
-
-void onOTAEnd(bool success) {
-  // Log when OTA has finished
-  if (success) {
-    Serial.println("OTA update finished successfully!");
-  } else {
-    Serial.println("There was an error during OTA update!");
-  }
-  // <Add your own code here>
-}
-
 // callback notifying us of the need to save config
 void saveConfigCallback() {
   Serial.println("Should save config");
@@ -166,11 +141,7 @@ void setup() {
   Serial.println("MAC Address: " + String(WiFi.macAddress()));
 
   Serial.println("Setup Ota Module");
-  ElegantOTA.begin(&server);  // Start ElegantOTA
-  // ElegantOTA callbacks
-  ElegantOTA.onStart(onOTAStart);
-  ElegantOTA.onProgress(onOTAProgress);
-  ElegantOTA.onEnd(onOTAEnd);
+  ota_begin(&server);
 
   Serial.println("Setup WebApi");
   webApi.begin();
@@ -191,7 +162,7 @@ void loop() {
   mrd->loop();
   webApi.loop();
   mqtt.loop();
-  ElegantOTA.loop();
+  ota_loop();
 
   if ((millis() - last_execution) >= SYSTEM_STAT_INTERVAL) {
     // Serial.println("Executing Stuff: " + String(last_execution));
