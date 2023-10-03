@@ -59,14 +59,22 @@ bool isReading = false;
 
 void tick() {
   int state = digitalRead(LED_BUILTIN);
-
-  if (isReading && state != LOW) {
-    digitalWrite(LED_BUILTIN, LOW);
+  // Blinking
+  if (!isConnected) {
+    digitalWrite(LED_BUILTIN, !state);
     return;
   }
 
-  if (!isConnected) {
-    digitalWrite(LED_BUILTIN, !state);
+  // Blinkig while reading
+  if (isReading && state != LOW) {
+    digitalWrite(LED_BUILTIN, LOW);
+    isReading = false;
+    return;
+  }
+
+  if (!isReading && state != HIGH) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    return;
   }
 };
 
@@ -111,6 +119,10 @@ void setup() {
   if (!config.begin()) {
     Serial.println("Failed to initialize config manager");
   }
+
+  Serial.println("instantiate led controller");
+  pinMode(LED_BUILTIN, OUTPUT);
+  ticker.attach(0.5, tick);
 
   Serial.println("Starting " + config.data.deviceName + ", HW ID: " + WiFi.macAddress());
   WiFi.hostname(config.data.deviceName.c_str());
@@ -171,10 +183,6 @@ void setup() {
   dpm = new Psu(&config);
   Serial.println("Connected to DCDC: " + String(dpm->begin(&uart)));
   Serial.println("configure Mqtt: " + String(mqtt.begin(dpm)));
-
-  Serial.println("instantiate led controller");
-  pinMode(LED_BUILTIN, OUTPUT);
-  ticker.attach(0.5, tick);
 }
 
 void loop() {
@@ -190,7 +198,6 @@ void loop() {
     isReading = true;
     DpmDeviceData dpmData = dpm->read();
     isConnected = dpmData.connected;
-    isReading = false;
 
     webApi.dash(dpmData);
     mqtt.publish(dpmData);

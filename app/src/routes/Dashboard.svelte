@@ -5,7 +5,6 @@
 	let data = writable<Record<string, string | number>>({});
 	let table = derived(data, (v) => Object.entries(v));
 	const cccvStatus = derived(data, (v) => (v.cccv_status ?? '') as string);
-	const powerStatus = derived(data, (v) => v.power);
 
 	const events = new EventSource(new URL('events', apiEndpoint));
 	events.addEventListener(

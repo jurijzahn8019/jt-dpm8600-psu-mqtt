@@ -16,25 +16,25 @@ void onRequest(AsyncWebServerRequest* request) {
 
   // Handle Unknown Request
   Serial.println("Not Found Serve Index page");
-  AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html);
-  response->addHeader("Content-Type", "text/html");
+  AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html_gz, index_html_gz_len);
+  response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
 
 void webAppBegin(AsyncWebServer* server) {
   server->on("/", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html);
-    // response->addHeader("Content-Encoding", "gzip");
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html_gz, index_html_gz_len);
+    response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
   server->on("/index.js", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "application/javascript", index_js);
-    // response->addHeader("Content-Encoding", "gzip");
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "application/javascript", index_js_gz, index_js_gz_len);
+    response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
   server->on("/index.css", [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", index_css);
-    // response->addHeader("Content-Encoding", "gzip");
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", index_css_gz, index_css_gz_len);
+    response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
 
