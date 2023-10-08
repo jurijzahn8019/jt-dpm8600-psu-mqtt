@@ -4,26 +4,33 @@
 
 	async function onClick() {
 		await (await fetch(new URL('restart', apiEndpoint), { method: 'POST' })).json();
-		modal.checked = true;
+		showModal = true;
 	}
 
-	let modal: HTMLInputElement;
+	let showModal = false;
 </script>
 
-This will restart the device
-<button on:click={onClick}>Restart Device</button>
+<div class="box">
+	<p>This will restart the device</p>
+	<div class="field is-grouped is-grouped-right">
+		<p class="control">
+			<button class="button is-primary" on:click={onClick}>Restart Device</button>
+		</p>
+	</div>
+</div>
 
-<div class="modal">
-	<input id="modal_1" type="checkbox" bind:this={modal} />
-	<label for="modal_1" class="overlay" />
-	<article>
-		<header>
-			<h3>Restart inhibited</h3>
-			<!-- <label for="modal_1" class="close">&times;</label> -->
+<div class="modal {showModal ? 'is-active' : ''}">
+	<div class="modal-background"></div>
+	<div class="modal-card">
+		<header class="modal-card-head">
+			<p class="modal-card-title">Restart inhibited</p>
+			<!-- <button class="delete" aria-label="close"></button> -->
 		</header>
-		<section class="content">The device will no restart, this can take several seconds</section>
-		<footer>
-			<Link class="button" to="/">Go to Dashboard</Link>
+		<section class="modal-card-body">
+			The device will no restart, this can take several seconds
+		</section>
+		<footer class="modal-card-foot">
+			<Link class="button is-success" to="/">Go to Dashboard</Link>
 		</footer>
-	</article>
+	</div>
 </div>

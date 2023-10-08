@@ -65,7 +65,7 @@ void WebApi::begin() {
 
     // send event with name: "message" ,id current millis
     // and set reconnect delay to 1 second
-    client->send("connected", NULL, millis(), 1000);
+    client->send("connected", NULL, millis(), 5500);
 
     publishDashboard();
   });

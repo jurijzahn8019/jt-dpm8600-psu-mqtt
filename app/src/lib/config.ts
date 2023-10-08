@@ -11,27 +11,34 @@ export type Config = {
   dpm_bus_id: string;
 };
 
-async function load(): Promise<Config> {
-  return (await fetch(new URL('config', apiEndpoint))).json();
+const config = writable<Config>({} as never);
+
+async function refresh(): Promise<void> {
+  const c = await (await fetch(new URL('config', apiEndpoint))).json();
+  config.set(c)
 }
 
-async function save(value: Config): Promise<Config> {
-  return (
+async function update(value: Config): Promise<void> {
+  const res: Config = await (
     await fetch(new URL('config', apiEndpoint), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(value)
     })
   ).json();
+
+  config.set(res);
 }
 
-const config = writable<Config>({} as never);
-load().then(d => config.set(d));
+function get(): Readable<Config> {
+  refresh();
+  return config;
+}
 
-setInterval(async () => {
-  config.set(await load());
-}, 5000);
-
-export function useConfig(): [current: Readable<Config>, update: (value: Config) => void] {
-  return [config, save];
+export function useConfig(): [
+  get: () => Readable<Config>,
+  update: (value: Config) => Promise<void>,
+  refresh: () => Promise<void>,
+] {
+  return [get, update, refresh];
 }

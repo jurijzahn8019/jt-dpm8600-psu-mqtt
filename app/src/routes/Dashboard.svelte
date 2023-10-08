@@ -3,6 +3,8 @@
 	import { apiEndpoint } from '../lib/env';
 	import { Gauge, type GaugeOptions } from 'gaugeJS';
 	import { onMount } from 'svelte';
+	// @ts-ignore
+	import bulmaSlider from 'bulma-slider/src/js/index.js';
 
 	type DashData = Partial<{
 		voltage: number;
@@ -42,7 +44,7 @@
 			divColor: '#fff',
 			subColor: '#fff'
 		},
-		radiusScale: 0.8
+		radiusScale: 0.7
 	};
 
 	const data = writable<DashData>({});
@@ -86,74 +88,102 @@
 			}
 		});
 		currentGauge.maxValue = 24;
+
+		bulmaSlider.attach();
 	});
 </script>
 
-<div class="flex two">
-	<canvas bind:this={voltageCanvas} />
-	<canvas bind:this={currentCanvas} />
-	<div style="text-align: center;">{round2($data.voltage)} V</div>
-	<div style="text-align: center;">{round2($data.current)} A</div>
-</div>
-
-<h3>State</h3>
-<div class="flex two">
-	<div>
-		Connection:
-		<span class="label connection--{$data.connected ? 'connected' : 'disconnected'}"
-			>{$data.connected ? 'connected' : 'disconnected'}</span
-		>
+<div class="columns is-mobile is-gapless">
+	<div class="column">
+		<canvas style="width:100%;" bind:this={voltageCanvas} />
 	</div>
-	<div>Temp: {round2($data.temperature)} C°</div>
-
-	<!-- <div>RSSI: {$data.RSSI}</div> -->
-
-	<div>CC/CV: <span class="label max_type--{$cccvStatus.toLowerCase()}">{$cccvStatus}</span></div>
-	<div>Power: <span class="label power--{$powerStatus.toLowerCase()}">{$powerStatus}</span></div>
+	<div class="column">
+		<canvas style="width:100%;" bind:this={currentCanvas} />
+	</div>
+</div>
+<div class="columns is-mobile is-gapless">
+	<div class="column has-text-centered">
+		{round2($data.voltage)} V
+	</div>
+	<div class="column has-text-centered" style="text-align: center;">
+		{round2($data.current)} A
+	</div>
 </div>
 
-<h3>Targets</h3>
-<div class="flex two">
-	<div>Voltage: {round2($data.max_voltage)} V</div>
-	<div>Current: {round2($data.max_current)} A</div>
+<div class="box">
+	<div class="columns is-mobile">
+		<div class="column has-text-centered">Connection</div>
+		<div class="column has-text-centered">Temp</div>
+		<div class="column has-text-centered">Mode</div>
+		<div class="column has-text-centered">Power</div>
+	</div>
+
+	<div class="columns is-mobile">
+		<div class="column has-text-centered">
+			<!-- <div class="tags has-addons"> -->
+			<span class="tag {$data.connected ? 'is-success' : 'is-danger'}"
+				>{$data.connected ? 'connected' : 'disconnected'}</span
+			>
+			<!-- </div> -->
+		</div>
+		<div class="column has-text-centered">
+			{round2($data.temperature)} C°
+		</div>
+		<div class="column">
+			<div class="tags has-addons is-centered">
+				<span class="tag is-success {$cccvStatus === 'CV' ? '' : 'is-light'}">CV</span>
+				<span class="tag is-warning {$cccvStatus === 'CC' ? '' : 'is-light'}">CC</span>
+			</div>
+		</div>
+
+		<div class="column has-text-centered">
+			<!-- <div class="tags has-addons"> -->
+			<span
+				class="tag {$powerStatus.toLowerCase() === 'on'
+					? 'is-success'
+					: $powerStatus.toLowerCase() === 'off'
+					? 'is-danger'
+					: 'is-light'}">{$powerStatus || 'unknown'}</span
+			>
+			<!-- </div> -->
+		</div>
+	</div>
+</div>
+
+<div class="box">
+	<div class="columns is-mobile has-text-centered">
+		<div class="column">
+			Target Voltage: {round2($data.max_voltage)} V
+		</div>
+		<div class="column">
+			Target Current: {round2($data.max_current)} A
+		</div>
+	</div>
+	<div class="columns is-mobile">
+		<div class="column">
+			<input
+				id="input-voltage"
+				class="slider is-fullwidth is-success"
+				step="0.1"
+				min="0"
+				max="60"
+				bind:value={$data.max_voltage}
+				type="range"
+			/>
+		</div>
+		<div class="column">
+			<input
+				id="input-current"
+				class="slider is-fullwidth is-warning"
+				step="0.1"
+				min="0"
+				max="24"
+				bind:value={$data.max_current}
+				type="range"
+			/>
+		</div>
+	</div>
 </div>
 
 <style lang="scss">
-	.indicator {
-		width: 1.5rem;
-		height: 1.5rem;
-		display: inline-block;
-		border-radius: 50%;
-		background-color: grey;
-		margin-bottom: -0.35rem;
-	}
-
-	.power {
-		&--on {
-			background-color: green;
-		}
-
-		&--off {
-			background-color: red;
-		}
-	}
-
-	.max_type {
-		&--cc {
-			background-color: orange;
-		}
-		&--cv {
-			background-color: green;
-		}
-	}
-
-	.connection {
-		&--disconnected {
-			background-color: red;
-		}
-
-		&--connected {
-			background-color: green;
-		}
-	}
 </style>

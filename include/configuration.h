@@ -17,6 +17,8 @@ class Configuration {
     String mqttPass;
     String mqttPrefix;
     int8_t dpmBusId;
+    // Restart interval in hours
+    int8_t restartInterval;
   };
 
   Configuration(String dev_name);

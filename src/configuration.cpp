@@ -9,6 +9,7 @@ Configuration::Configuration(String dev_name)
           .mqttPass = "",
           .mqttPrefix = "dcdc",
           .dpmBusId = 1,
+          .restartInterval = 12,
       } {
 }
 
@@ -71,6 +72,7 @@ StaticJsonDocument<1024> Configuration::getJson() {
   json["mqtt_pass"] = data.mqttPass;
   json["mqtt_prefix"] = data.mqttPrefix;
   json["dpm_bus_id"] = data.dpmBusId;
+  json["restart_interval"] = data.restartInterval;
   return json;
 }
 
@@ -88,4 +90,5 @@ void Configuration::fromJson(const JsonObject json) {
   data.mqttPass = json["mqtt_pass"] | data.mqttPass;
   data.mqttPrefix = json["mqtt_prefix"] | data.mqttPrefix;
   data.dpmBusId = json["dpm_bus_id"] | data.dpmBusId;
+  data.restartInterval = json["restart_interval"] | data.restartInterval;
 }
