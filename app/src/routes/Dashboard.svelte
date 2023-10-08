@@ -136,16 +136,17 @@
 			</div>
 		</div>
 
-		<div class="column has-text-centered">
-			<!-- <div class="tags has-addons"> -->
-			<span
-				class="tag {$powerStatus.toLowerCase() === 'on'
-					? 'is-success'
-					: $powerStatus.toLowerCase() === 'off'
-					? 'is-danger'
-					: 'is-light'}">{$powerStatus || 'unknown'}</span
+		<div class="column has-text-centered is-vcentered">
+			<input
+				id="switchColorDefault"
+				type="checkbox"
+				name="switchColorDefault"
+				class="switch"
+				checked={$powerStatus === 'on'}
+			/>
+			<label style="margin-top: -0.5rem;" for="switchColorDefault"
+				>{$powerStatus || 'unknown'}</label
 			>
-			<!-- </div> -->
 		</div>
 	</div>
 </div>

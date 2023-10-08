@@ -56,7 +56,7 @@
 					{#if (conf.type ?? typeof $data[key]) === 'number'}
 						<input
 							id={key}
-							class="input is-primary"
+							class="input"
 							type="number"
 							placeholder={humanize(key)}
 							bind:value={$data[key]}
@@ -64,7 +64,7 @@
 					{:else if (conf.type ?? typeof $data[key]) === 'password'}
 						<input
 							id={key}
-							class="input is-primary"
+							class="input"
 							type="password"
 							placeholder={humanize(key)}
 							bind:value={$data[key]}
@@ -72,7 +72,7 @@
 					{:else}
 						<input
 							id={key}
-							class="input is-primary"
+							class="input"
 							type="text"
 							placeholder={humanize(key)}
 							bind:value={$data[key]}
